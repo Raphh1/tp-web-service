@@ -10,7 +10,7 @@
   },
   "scripts": {
     "secret": "node scripts/generate-secret.ts",
-    "infra": "docker compose up -d user-db",
+    "infra": "docker compose up -d user-db recipe-db",
     "build": "pnpm -r build",
     "dev": "pnpm --filter \"./packages/**\" build && pnpm -r --parallel dev",
     "lint": "pnpm -r lint && eslint scripts",
