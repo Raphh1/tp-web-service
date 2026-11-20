@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Inject,
   type OnModuleInit,
   Post,
+  Req,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import {
@@ -16,6 +18,8 @@ import { lastValueFrom } from 'rxjs';
 
 import { USER_CLIENT } from '../common/grpc.js';
 import { LoginDto, RegisterDto } from './auth.dto.js';
+import { type AuthenticatedRequest } from './auth.guard.js';
+import { Public } from './public.decorator.js';
 
 @Controller()
 export class AuthController implements OnModuleInit {
@@ -26,8 +30,15 @@ export class AuthController implements OnModuleInit {
 
   @HttpCode(200)
   @Post('auth/login')
+  @Public()
   login(@Body() body: LoginDto): Promise<LoginResponse> {
     return lastValueFrom(this.users.login(body));
+  }
+
+  /** Read from the token itself: no call to the user service */
+  @Get('me')
+  me(@Req() request: AuthenticatedRequest): User {
+    return request.user;
   }
 
   onModuleInit() {
@@ -35,6 +46,7 @@ export class AuthController implements OnModuleInit {
   }
 
   @Post('auth/register')
+  @Public()
   register(@Body() body: RegisterDto): Promise<User> {
     return lastValueFrom(this.users.register(body));
   }
