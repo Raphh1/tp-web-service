@@ -1,16 +1,17 @@
-import type { HydratedDocument, Model } from 'mongoose';
-
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import {
+  type GetUsersRequest,
+  type GetUsersResponse,
   type LoginRequest,
   type LoginResponse,
   type RegisterRequest,
   type User as UserDto,
 } from '@recipes/contracts';
 import { rpcError } from '@recipes/contracts/grpc';
+import { type HydratedDocument, isValidObjectId, type Model } from 'mongoose';
 
 import { hashPassword, verifyPassword } from './password.js';
 import { TokenService } from './token.service.js';
@@ -25,6 +26,15 @@ export class UserController {
     @InjectModel(User.name) private readonly users: Model<User>,
     private readonly tokens: TokenService,
   ) {}
+
+  @GrpcMethod('UserService', 'GetUsers')
+  async getUsers({ ids }: GetUsersRequest): Promise<GetUsersResponse> {
+    const users = await this.users.find({
+      _id: { $in: ids.filter((id) => isValidObjectId(id)) },
+    });
+
+    return { users: users.map((user) => toDto(user)) };
+  }
 
   @GrpcMethod('UserService', 'Login')
   async login({ email, password }: LoginRequest): Promise<LoginResponse> {
