@@ -5,8 +5,8 @@
 Workspaces pnpm :
 
 ```
-apps/       ce qui se lance : gateway, user, recipe, enricher, job-runner, front, fake-llm-api
-packages/   ce que les apps partagent : eslint, tsconfig, config, contracts, messaging
+apps/       ce qui se lance : gateway, user, front
+packages/   ce que les apps partagent : eslint, tsconfig, config, contracts
 docs/       cette documentation
 scripts/    génération de clé, smoke test
 ```
@@ -14,8 +14,8 @@ scripts/    génération de clé, smoke test
 - Chaque app et chaque package a son `package.json`, nommé `@recipes/<nom>`.
 - Une app déclare ses dépendances avec des **versions exactes** (`saveExact` dans `pnpm-workspace.yaml`), et les packages du workspace en `workspace:*`.
 - Un package déclare les librairies qu'il utilise en **`peerDependencies: "*"`**. C'est l'app qui fixe la version, et il n'en existe qu'une copie à l'exécution, ce qui est indispensable pour NestJS.
-- Les packages de code (`config`, `contracts`, `messaging`) sont compilés dans leur `dist/` avec `tsc`.
-- `@recipes/contracts` a deux points d'entrée : le principal (types, événements, jobs, sans dépendance) et `@recipes/contracts/grpc` (helpers gRPC). Un service qui ne fait pas de gRPC n'a pas à installer gRPC.
+- Les packages de code (`config`, `contracts`) sont compilés dans leur `dist/` avec `tsc`.
+- `@recipes/contracts` a deux points d'entrée : le principal (types, sans dépendance) et `@recipes/contracts/grpc` (helpers gRPC).
 
 ## TypeScript
 
@@ -51,5 +51,5 @@ Une exception se justifie sur la ligne même :
 
 ```
 feat(gateway): add rate limiting per user
-fix(enricher): ignore duplicated text.generated events
+fix(user): reject an empty password
 ```
